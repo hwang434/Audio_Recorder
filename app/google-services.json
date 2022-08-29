@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "11391842085",
+    "project_id": "audio-recorder-e0d2a",
+    "storage_bucket": "audio-recorder-e0d2a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:11391842085:android:4f0c5d31776614b396cccc",
+        "android_client_info": {
+          "package_name": "com.example.audiorecorder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "11391842085-bufmfoi3lcvvg8pm82vj9um70tj4frmd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBl7Gkw4KcU4-dfJq_u5ZwappBiTAs-7xI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "11391842085-bufmfoi3lcvvg8pm82vj9um70tj4frmd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
