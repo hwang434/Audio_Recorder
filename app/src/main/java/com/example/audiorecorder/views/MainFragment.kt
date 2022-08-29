@@ -28,11 +28,14 @@ class MainFragment : Fragment() {
     private lateinit var binding: FragmentMainBinding
     private lateinit var viewModel: MainViewModel
     private lateinit var recorder: MediaRecorder
+    private lateinit var directoryOfVoice: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG,"MainFragment - onCreate() called")
         super.onCreate(savedInstanceState)
+
         viewModel = MainViewModel()
+        directoryOfVoice = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
     }
 
     override fun onCreateView(
@@ -40,8 +43,10 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         Log.d(TAG,"MainFragment - onCreateView() called")
+
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main, container, false)
         setEvent()
+
         return binding.root
     }
 
@@ -50,43 +55,49 @@ class MainFragment : Fragment() {
 
         // 녹음 시작
         binding.buttonRecordVoiceButton.setOnClickListener {
+            if (!checkPermission()) {
+                return@setOnClickListener
+            }
+
             startRecord()
+            binding.buttonRecordVoiceButton.visibility = View.GONE
+            binding.buttonStopRecord.visibility = View.VISIBLE
         }
 
-        // 녹음 일시 정지
-        binding.buttonPauseRecord.setOnClickListener {
-            pauseRecord()
-        }
-
-        // 녹음 정지
+        // 녹음 종료
         binding.buttonStopRecord.setOnClickListener {
             stopRecord()
+            binding.buttonStopRecord.visibility = View.GONE
+            binding.buttonRecordVoiceButton.visibility = View.VISIBLE
         }
+    }
+
+    private fun checkPermission(): Boolean {
+        Log.d(TAG,"MainFragment - checkPermission() called")
+        // if : 권한 요청하면 return false
+        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(),  arrayOf(Manifest.permission.RECORD_AUDIO), 0)
+            return false
+        }
+
+        // 이미 권한을 요청했으므로 true
+        return true
     }
 
     // 녹음 시작
     private fun startRecord() {
         Log.d(TAG,"MainFragment - startRecord() called")
-        if (ActivityCompat.checkSelfPermission(requireActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(requireActivity(),  arrayOf(Manifest.permission.RECORD_AUDIO), 0)
-            return
-        }
-
+        // if : 권한 부여 안했으면 -> 녹음 안함.
         recorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MediaRecorder(requireContext())
         } else {
             MediaRecorder()
         }
 
-        val file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/" + System.currentTimeMillis() + ".3gp"
+        // 저장 될 파일 명
+        val nameOfFile = "/" + System.currentTimeMillis() + ".3gp"
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            recorder.setOutputFile(file)
-        } else {
-            recorder.setOutputFile("${requireContext().externalCacheDir?.absolutePath}/recording.3gp")
-        }
-
+        recorder.setOutputFile(directoryOfVoice + nameOfFile)
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 
@@ -104,17 +115,14 @@ class MainFragment : Fragment() {
     // 정지 = 아예 정지하고 업로드함.
     private fun stopRecord() {
         Log.d(TAG,"MainFragment - stopRecord() called")
-        recorder.reset()
-        recorder.release()
-    }
 
-    // 녹음 일시 정지
-    private fun pauseRecord() {
-        Log.d(TAG,"MainFragment - pauseRecord() called")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            recorder.pause()
-        } else {
-            recorder.stop()
+        try {
+            recorder.reset()
+            recorder.release()
+        } catch (e: UninitializedPropertyAccessException) {
+            Log.w(TAG, "stopRecord: recorder가 아직 초기화되지 않음", e)
+        } catch (e: Exception) {
+            Log.w(TAG, "stopRecord: ", e)
         }
     }
 }
