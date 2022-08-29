@@ -13,7 +13,7 @@
             android:id="@+id/textview_ongoing_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="현재 녹음 시간 : "
+            android:text="@string/current_time_placeholder"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +24,7 @@
             android:id="@+id/button_record_voice_button"
             android:layout_width="250dp"
             android:layout_height="70dp"
-            android:text="녹음 시작"
+            android:text="@string/record_start_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -34,11 +34,20 @@
             android:id="@+id/button_stop_record"
             android:layout_width="250dp"
             android:layout_height="70dp"
-            android:text="녹음 중지"
+            android:text="@string/record_stop_button"
             app:layout_constraintBottom_toBottomOf="@+id/button_record_voice_button"
             app:layout_constraintTop_toTopOf="@+id/button_record_voice_button"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:visibility="gone"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/button_upload_voice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_margin="40dp"
+            android:contentDescription="@string/upload_content_description"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

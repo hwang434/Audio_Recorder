@@ -70,6 +70,11 @@ class MainFragment : Fragment() {
             binding.buttonStopRecord.visibility = View.GONE
             binding.buttonRecordVoiceButton.visibility = View.VISIBLE
         }
+
+        // 녹음 파일 업로드
+        binding.buttonUploadVoice.setOnClickListener {
+            uploadVoice()
+        }
     }
 
     private fun checkPermission(): Boolean {
@@ -101,6 +106,8 @@ class MainFragment : Fragment() {
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 
+        Log.d(TAG,"MainFragment - 파일 이름 ${directoryOfVoice + nameOfFile}")
+
         try {
             recorder.prepare()
         } catch (e: Exception) {
@@ -124,5 +131,10 @@ class MainFragment : Fragment() {
         } catch (e: Exception) {
             Log.w(TAG, "stopRecord: ", e)
         }
+    }
+
+    private fun uploadVoice() {
+        Log.d(TAG,"MainFragment - uploadVoice() called")
+        viewModel.uploadVoice()
     }
 }
