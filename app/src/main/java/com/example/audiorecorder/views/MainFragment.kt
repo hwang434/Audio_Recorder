@@ -17,7 +17,6 @@ import androidx.fragment.app.Fragment
 import com.example.audiorecorder.R
 import com.example.audiorecorder.databinding.FragmentMainBinding
 import com.example.audiorecorder.ui.main.MainViewModel
-import java.io.File
 
 class MainFragment : Fragment() {
 
@@ -34,11 +33,6 @@ class MainFragment : Fragment() {
         Log.d(TAG,"MainFragment - onCreate() called")
         super.onCreate(savedInstanceState)
         viewModel = MainViewModel()
-        recorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            MediaRecorder(requireContext())
-        } else {
-            MediaRecorder()
-        }
     }
 
     override fun onCreateView(
@@ -78,14 +72,21 @@ class MainFragment : Fragment() {
             return
         }
 
-        val file = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD_MR1) {
-            requireActivity().getExternalFilesDir(Environment.DIRECTORY_DCIM).toString() + "/" + System.currentTimeMillis() + ".mp3";
+        recorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            MediaRecorder(requireContext())
         } else {
-            Environment.getExternalStorageDirectory().toString() + "/" + System.currentTimeMillis() + ".mp3";
+            MediaRecorder()
         }
-        recorder = MediaRecorder()
+
+        val file = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath + "/" + System.currentTimeMillis() + ".3gp"
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-        recorder.setOutputFile(file)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            recorder.setOutputFile(file)
+        } else {
+            recorder.setOutputFile("${requireContext().externalCacheDir?.absolutePath}/recording.3gp")
+        }
+
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 
@@ -103,7 +104,7 @@ class MainFragment : Fragment() {
     // 정지 = 아예 정지하고 업로드함.
     private fun stopRecord() {
         Log.d(TAG,"MainFragment - stopRecord() called")
-        recorder.stop()
+        recorder.reset()
         recorder.release()
     }
 
