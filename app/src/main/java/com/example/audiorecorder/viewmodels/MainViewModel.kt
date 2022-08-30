@@ -1,9 +1,9 @@
-package com.example.audiorecorder.ui.main
+package com.example.audiorecorder.viewmodels
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.example.audiorecorder.ui.main.domain.IStorageDao
-import com.example.audiorecorder.ui.main.domain.StorageDao
+import com.example.audiorecorder.domain.IStorageDao
+import com.example.audiorecorder.domain.StorageDao
 import kotlinx.coroutines.delay
 
 class MainViewModel : ViewModel() {

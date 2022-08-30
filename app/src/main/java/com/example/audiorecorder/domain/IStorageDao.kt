@@ -1,4 +1,4 @@
-package com.example.audiorecorder.ui.main.domain
+package com.example.audiorecorder.domain
 
 import android.net.Uri
 
