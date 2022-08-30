@@ -1,7 +1,6 @@
 package com.example.audiorecorder.views
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
@@ -31,6 +30,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class MainFragment : Fragment() {
+
     companion object {
         private const val TAG: String = "로그"
         fun newInstance() = MainFragment()
