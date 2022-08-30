@@ -3,21 +3,33 @@ package com.example.audiorecorder.ui.main.domain
 import android.net.Uri
 import android.util.Log
 import com.google.firebase.storage.FirebaseStorage
-import java.io.File
 
 class StorageDao: IStorageDao {
     companion object {
-        private val TAG: String = "로그"
+        private const val TAG: String = "로그"
     }
+    private val voiceDirectory = "voices/"
     
     private val storageReference by lazy { FirebaseStorage.getInstance().reference }
-    override fun uploadVoice() {
+    override suspend fun uploadVoice(uri: Uri): Boolean {
         Log.d(TAG,"StorageDao - uploadVoice() called")
 
-        val file = Uri.fromFile(File("/storage/emulated/0/Download/1661764058737.3gp"))
-        val ref = storageReference.child("voices/${file.lastPathSegment}")
-        ref.putFile(file).addOnCompleteListener { 
+        // 저장될 디렉터리 명
+        val directory = StringBuilder(voiceDirectory)
+        val fullFileName = uri.lastPathSegment?.split("/")
+        val fileName = fullFileName?.get(fullFileName.size - 1)
+
+        directory.append(fileName)
+        Log.d(TAG,"StorageDao - directory : $directory")
+        val ref = storageReference.child("$directory")
+
+        ref.putFile(uri).addOnCompleteListener {
             Log.d(TAG,"StorageDao - isSuccess : ${it.isSuccessful} called")
+            if (!it.isSuccessful) {
+                throw Exception("오디오 파일 업로드 실패")
+            }
         }
+
+        return true
     }
 }

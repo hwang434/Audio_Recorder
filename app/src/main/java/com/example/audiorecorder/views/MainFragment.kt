@@ -1,25 +1,36 @@
 package com.example.audiorecorder.views
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.viewModelScope
 import com.example.audiorecorder.R
 import com.example.audiorecorder.databinding.FragmentMainBinding
 import com.example.audiorecorder.ui.main.MainViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainFragment : Fragment() {
-
     companion object {
         private const val TAG: String = "로그"
         fun newInstance() = MainFragment()
@@ -29,13 +40,18 @@ class MainFragment : Fragment() {
     private lateinit var viewModel: MainViewModel
     private lateinit var recorder: MediaRecorder
     private lateinit var directoryOfVoice: String
+    private lateinit var intentOfPickAudio: ActivityResultLauncher<String>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG,"MainFragment - onCreate() called")
         super.onCreate(savedInstanceState)
 
+        // 뷰모델 초기화
         viewModel = MainViewModel()
+        // 음성파일 저장할 공간
         directoryOfVoice = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
+        registerIntent()
     }
 
     override fun onCreateView(
@@ -73,10 +89,11 @@ class MainFragment : Fragment() {
 
         // 녹음 파일 업로드
         binding.buttonUploadVoice.setOnClickListener {
-            uploadVoice()
+            getAudioURI()
         }
     }
 
+    // 권한 있는지 확인
     private fun checkPermission(): Boolean {
         Log.d(TAG,"MainFragment - checkPermission() called")
         // if : 권한 요청하면 return false
@@ -92,6 +109,7 @@ class MainFragment : Fragment() {
     // 녹음 시작
     private fun startRecord() {
         Log.d(TAG,"MainFragment - startRecord() called")
+
         // if : 권한 부여 안했으면 -> 녹음 안함.
         recorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             MediaRecorder(requireContext())
@@ -100,7 +118,7 @@ class MainFragment : Fragment() {
         }
 
         // 저장 될 파일 명
-        val nameOfFile = "/" + System.currentTimeMillis() + ".3gp"
+        val nameOfFile = "/" + SimpleDateFormat("MM월 dd일 HH시 MM분 ss초", Locale.KOREA).format(System.currentTimeMillis()) + ".mp3"
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
         recorder.setOutputFile(directoryOfVoice + nameOfFile)
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
@@ -119,7 +137,7 @@ class MainFragment : Fragment() {
         recorder.start()
     }
 
-    // 정지 = 아예 정지하고 업로드함.
+    // 정지 = 아예 정지하고 파일을 저장함.
     private fun stopRecord() {
         Log.d(TAG,"MainFragment - stopRecord() called")
 
@@ -133,8 +151,38 @@ class MainFragment : Fragment() {
         }
     }
 
-    private fun uploadVoice() {
+    // 올릴 오디오 파일에 URI를 조회하는 기능.
+    private fun getAudioURI() {
         Log.d(TAG,"MainFragment - uploadVoice() called")
-        viewModel.uploadVoice()
+        intentOfPickAudio.launch("audio/*")
+    }
+
+    // 오디오 파일 업로드
+    private fun uploadVoice(uri: Uri) {
+        try {
+            viewModel.viewModelScope.launch(Dispatchers.IO) {
+                viewModel.uploadVoice(uri)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "오디오 파일 업로드에 성공했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "uploadVoice: ", e)
+            Toast.makeText(requireContext(), "오디오 파일 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 오디오 파일 URI 조회 및 업로드를 위해 시작할 인텐트 초기화.
+    private fun registerIntent() {
+        Log.d(TAG,"MainFragment - registerIntent() called")
+        val intent = Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
+        intent.type = "audio/*"
+
+        intentOfPickAudio = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            Log.d(TAG,"MainFragment - uri : $uri")
+            uri?.let { it ->
+                uploadVoice(it)
+            }
+        }
     }
 }
