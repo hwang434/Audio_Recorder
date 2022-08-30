@@ -1,7 +1,6 @@
 package com.example.audiorecorder.views
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
@@ -21,9 +20,10 @@ import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
 import com.example.audiorecorder.R
 import com.example.audiorecorder.databinding.FragmentMainBinding
-import com.example.audiorecorder.ui.main.MainViewModel
+import com.example.audiorecorder.viewmodels.VoiceViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -31,13 +31,14 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class MainFragment : Fragment() {
+
     companion object {
         private const val TAG: String = "로그"
         fun newInstance() = MainFragment()
     }
 
     private lateinit var binding: FragmentMainBinding
-    private lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: VoiceViewModel
     private lateinit var recorder: MediaRecorder
     private lateinit var directoryOfVoice: String
     private lateinit var intentOfPickAudio: ActivityResultLauncher<String>
@@ -48,7 +49,7 @@ class MainFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // 뷰모델 초기화
-        viewModel = MainViewModel()
+        viewModel = VoiceViewModel()
         // 음성파일 저장할 공간
         directoryOfVoice = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
         registerIntent()
@@ -59,7 +60,6 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         Log.d(TAG,"MainFragment - onCreateView() called")
-
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main, container, false)
         setEvent()
 
@@ -90,6 +90,11 @@ class MainFragment : Fragment() {
         // 녹음 파일 업로드
         binding.buttonUploadVoice.setOnClickListener {
             getAudioURI()
+        }
+
+        // 녹음 파일 목록으로 이동
+        binding.buttonToVoiceList.setOnClickListener {
+            findNavController().navigate(R.id.action_mainFragment_to_voiceListFragment)
         }
     }
 

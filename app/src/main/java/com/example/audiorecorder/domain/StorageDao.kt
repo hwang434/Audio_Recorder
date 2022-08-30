@@ -1,8 +1,11 @@
-package com.example.audiorecorder.ui.main.domain
+package com.example.audiorecorder.domain
 
 import android.net.Uri
 import android.util.Log
+import com.example.audiorecorder.dto.Voice
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
 
 class StorageDao: IStorageDao {
     companion object {
@@ -31,5 +34,18 @@ class StorageDao: IStorageDao {
         }
 
         return true
+    }
+
+    override suspend fun getAllVoices(): List<Voice> {
+        Log.d(TAG,"StorageDao - getAllVoices() called")
+        val listOfResult = storageReference.child(voiceDirectory).listAll().await()
+        val listOfVoice = mutableListOf<Voice>()
+
+        listOfResult.items.forEach { item ->
+            Log.d(TAG,"StorageDao - item.name ${item.name}\nitem.storage : ${item.storage}\nitem.toString : ${item.toString()}")
+            listOfVoice.add(Voice(fileName = item.name, author = item.parent?.name.toString(), uri = item.toString()))
+        }
+
+        return listOfVoice
     }
 }
