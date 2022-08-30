@@ -11,7 +11,7 @@ class StorageDao: IStorageDao {
     }
     
     private val storageReference by lazy { FirebaseStorage.getInstance().reference }
-    override fun uploadVoice() {
+    override suspend fun uploadVoice() {
         Log.d(TAG,"StorageDao - uploadVoice() called")
 
         val file = Uri.fromFile(File("/storage/emulated/0/Download/1661764058737.3gp"))
