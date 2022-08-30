@@ -20,9 +20,10 @@ import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.fragment.findNavController
 import com.example.audiorecorder.R
 import com.example.audiorecorder.databinding.FragmentMainBinding
-import com.example.audiorecorder.ui.main.MainViewModel
+import com.example.audiorecorder.viewmodels.MainViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -59,7 +60,6 @@ class MainFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         Log.d(TAG,"MainFragment - onCreateView() called")
-
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_main, container, false)
         setEvent()
 
@@ -90,6 +90,11 @@ class MainFragment : Fragment() {
         // 녹음 파일 업로드
         binding.buttonUploadVoice.setOnClickListener {
             getAudioURI()
+        }
+
+        // 녹음 파일 목록으로 이동
+        binding.buttonToVoiceList.setOnClickListener {
+            findNavController().navigate(R.id.action_mainFragment_to_voiceListFragment)
         }
     }
 
