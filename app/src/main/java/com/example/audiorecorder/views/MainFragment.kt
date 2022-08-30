@@ -23,7 +23,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.example.audiorecorder.R
 import com.example.audiorecorder.databinding.FragmentMainBinding
-import com.example.audiorecorder.viewmodels.MainViewModel
+import com.example.audiorecorder.viewmodels.VoiceViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,7 +38,7 @@ class MainFragment : Fragment() {
     }
 
     private lateinit var binding: FragmentMainBinding
-    private lateinit var viewModel: MainViewModel
+    private lateinit var viewModel: VoiceViewModel
     private lateinit var recorder: MediaRecorder
     private lateinit var directoryOfVoice: String
     private lateinit var intentOfPickAudio: ActivityResultLauncher<String>
@@ -49,7 +49,7 @@ class MainFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         // 뷰모델 초기화
-        viewModel = MainViewModel()
+        viewModel = VoiceViewModel()
         // 음성파일 저장할 공간
         directoryOfVoice = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
         registerIntent()
