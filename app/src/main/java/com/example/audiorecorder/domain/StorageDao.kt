@@ -4,7 +4,6 @@ import android.net.Uri
 import android.util.Log
 import com.example.audiorecorder.dto.Voice
 import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 
 class StorageDao: IStorageDao {
@@ -47,5 +46,18 @@ class StorageDao: IStorageDao {
         }
 
         return listOfVoice
+    }
+
+    // uri 파일 재생
+    override suspend fun getDownloadLinkOfVoice(uri: Uri): Uri {
+        Log.d(TAG,"StorageDao - getDownloadLinkOfVoice() called")
+        Log.d(TAG,"StorageDao - uri.toString() : $uri")
+
+
+        Log.d(TAG,"StorageDao - uri.decode : ${Uri.decode(uri.toString())}")
+        val gsReference = FirebaseStorage.getInstance().getReferenceFromUrl(Uri.decode(uri.toString()))
+        val task = gsReference.downloadUrl
+        task.await()
+        return task.result
     }
 }

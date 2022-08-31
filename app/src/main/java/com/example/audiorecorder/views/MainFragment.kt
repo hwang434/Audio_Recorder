@@ -1,6 +1,8 @@
 package com.example.audiorecorder.views
 
 import android.Manifest
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
@@ -9,10 +11,12 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,6 +31,7 @@ import com.example.audiorecorder.viewmodels.VoiceViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -34,7 +39,6 @@ class MainFragment : Fragment() {
 
     companion object {
         private const val TAG: String = "로그"
-        fun newInstance() = MainFragment()
     }
 
     private lateinit var binding: FragmentMainBinding
@@ -42,12 +46,15 @@ class MainFragment : Fragment() {
     private lateinit var recorder: MediaRecorder
     private lateinit var directoryOfVoice: String
     private lateinit var intentOfPickAudio: ActivityResultLauncher<String>
+    private lateinit var originalName: String
+    private lateinit var aBuilder: AlertDialog.Builder
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG,"MainFragment - onCreate() called")
         super.onCreate(savedInstanceState)
-
+        // 파일 명 작명용 알림창 빌더
+        aBuilder = AlertDialog.Builder(requireContext())
         // 뷰모델 초기화
         viewModel = VoiceViewModel()
         // 음성파일 저장할 공간
@@ -123,13 +130,13 @@ class MainFragment : Fragment() {
         }
 
         // 저장 될 파일 명
-        val nameOfFile = "/" + SimpleDateFormat("MM월 dd일 HH시 MM분 ss초", Locale.KOREA).format(System.currentTimeMillis()) + ".mp3"
+        originalName = "${System.currentTimeMillis()}.mp3"
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-        recorder.setOutputFile(directoryOfVoice + nameOfFile)
+        recorder.setOutputFile("$directoryOfVoice/$originalName")
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 
-        Log.d(TAG,"MainFragment - 파일 이름 ${directoryOfVoice + nameOfFile}")
+        Log.d(TAG,"MainFragment - 파일 이름 ${directoryOfVoice + originalName}")
 
         try {
             recorder.prepare()
@@ -149,14 +156,42 @@ class MainFragment : Fragment() {
         try {
             recorder.reset()
             recorder.release()
+
+            val editViewForFileName = EditText(requireContext())
+            editViewForFileName.maxLines = 1
+            editViewForFileName.inputType = InputType.TYPE_CLASS_TEXT
+            aBuilder.apply {
+                setTitle("파일명을 입력해주세요.")
+                setView(editViewForFileName)
+                setPositiveButton("결정") { _, _ ->
+                    setFileName("${editViewForFileName.text}.mp3")
+                }
+            }
+            aBuilder.setTitle("파일명을 뭐라고 지으시겠습니다./")
+            aBuilder.create().show()
         } catch (e: UninitializedPropertyAccessException) {
-            Log.w(TAG, "stopRecord: recorder가 아직 초기화되지 않음", e)
+            Log.w(TAG, "stopRecord: recorder 가 아직 초기화되지 않음", e)
         } catch (e: Exception) {
             Log.w(TAG, "stopRecord: ", e)
         }
     }
 
-    // 올릴 오디오 파일에 URI를 조회하는 기능.
+    // 사용자가 웝하는 이름으로 파일명을 변경
+    private fun setFileName(fileName: String) {
+        Log.d(TAG,"MainFragment - setFileName() called")
+        Log.d(TAG,"MainFragment - originalName : $originalName fileName : $fileName called")
+        val dir = File(directoryOfVoice)
+        if (!dir.exists()) {
+            Log.d(TAG,"MainFragment - dir not exist() called")
+            return
+        }
+
+        val from = File(dir, originalName)
+        val to = File(dir, fileName)
+        from.renameTo(to)
+    }
+
+    // 올릴 오디오 파일에 URI 를 조회하는 기능.
     private fun getAudioURI() {
         Log.d(TAG,"MainFragment - uploadVoice() called")
         intentOfPickAudio.launch("audio/*")

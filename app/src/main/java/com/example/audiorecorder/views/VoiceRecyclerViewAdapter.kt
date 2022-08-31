@@ -6,12 +6,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModelStore
 import com.example.audiorecorder.R
 import com.example.audiorecorder.databinding.FragmentVoiceItemBinding
 import com.example.audiorecorder.dto.Voice
 
 class VoiceRecyclerViewAdapter(
-    private val livedataOfVoices: LiveData<List<Voice>>
+    private val livedataOfVoices: LiveData<List<Voice>>,
+    private val callBack: (uri: String?) -> Unit
 ) : RecyclerView.Adapter<VoiceRecyclerViewAdapter.ViewHolder>() {
     private val TAG: String = "로그"
 
@@ -29,6 +31,11 @@ class VoiceRecyclerViewAdapter(
         Log.d(TAG,"VoiceRecyclerViewAdapter - onBindViewHolder() called")
         val item = livedataOfVoices.value?.get(position)
         holder.binding.textviewNameOfVoice.text = item?.fileName
+        holder.binding.apply {
+            buttonPlay.setOnClickListener {
+                callBack(livedataOfVoices.value?.get(position)?.uri)
+            }
+        }
     }
 
     override fun getItemCount(): Int {

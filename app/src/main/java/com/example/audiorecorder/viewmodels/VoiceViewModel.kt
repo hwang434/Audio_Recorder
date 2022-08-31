@@ -11,12 +11,16 @@ import com.example.audiorecorder.domain.StorageDao
 import com.example.audiorecorder.dto.Voice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class VoiceViewModel : ViewModel() {
     private val liveDataOfVoices = MutableLiveData<List<Voice>>()
     val _liveDataOfVoices: LiveData<List<Voice>>
     get() = liveDataOfVoices
+    val uriOfVoice = flow<Uri> {
+//        emit(getUriOfVoice(uri))
+    }
 
     companion object {
         private const val TAG: String = "로그"
@@ -37,5 +41,11 @@ class VoiceViewModel : ViewModel() {
             Log.d(TAG,"VoiceViewModel - $listOfVoice")
             liveDataOfVoices.postValue(listOfVoice)
         }
+    }
+
+    // 음성 라이브 스트리밍
+    suspend fun getDownloadLinkOfVoice(uri: Uri): Uri {
+        Log.d(TAG,"VoiceViewModel - getDownloadLinkOfVoice() called")
+        return storageReference.getDownloadLinkOfVoice(uri)
     }
 }
