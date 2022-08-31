@@ -6,4 +6,5 @@ import com.example.audiorecorder.dto.Voice
 interface IStorageDao {
     suspend fun uploadVoice(uri: Uri): Boolean
     suspend fun getAllVoices(): List<Voice>
+    suspend fun getDownloadLinkOfVoice(uri: Uri): Uri
 }

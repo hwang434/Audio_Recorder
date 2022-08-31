@@ -34,7 +34,6 @@ class MainFragment : Fragment() {
 
     companion object {
         private const val TAG: String = "로그"
-        fun newInstance() = MainFragment()
     }
 
     private lateinit var binding: FragmentMainBinding
@@ -123,7 +122,7 @@ class MainFragment : Fragment() {
         }
 
         // 저장 될 파일 명
-        val nameOfFile = "/" + SimpleDateFormat("MM월 dd일 HH시 MM분 ss초", Locale.KOREA).format(System.currentTimeMillis()) + ".mp3"
+        val nameOfFile = "/" + SimpleDateFormat("MM년 ddHH시MMss", Locale.KOREA).format(System.currentTimeMillis()) + ".mp3"
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
         recorder.setOutputFile(directoryOfVoice + nameOfFile)
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
@@ -150,13 +149,13 @@ class MainFragment : Fragment() {
             recorder.reset()
             recorder.release()
         } catch (e: UninitializedPropertyAccessException) {
-            Log.w(TAG, "stopRecord: recorder가 아직 초기화되지 않음", e)
+            Log.w(TAG, "stopRecord: recorder 가 아직 초기화되지 않음", e)
         } catch (e: Exception) {
             Log.w(TAG, "stopRecord: ", e)
         }
     }
 
-    // 올릴 오디오 파일에 URI를 조회하는 기능.
+    // 올릴 오디오 파일에 URI 를 조회하는 기능.
     private fun getAudioURI() {
         Log.d(TAG,"MainFragment - uploadVoice() called")
         intentOfPickAudio.launch("audio/*")
