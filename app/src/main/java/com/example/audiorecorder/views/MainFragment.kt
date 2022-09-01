@@ -2,9 +2,12 @@ package com.example.audiorecorder.views
 
 import android.Manifest
 import android.app.AlertDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -18,6 +21,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewModelScope
@@ -120,7 +124,12 @@ class MainFragment : Fragment() {
         originalName = "${System.currentTimeMillis()}.mp3"
         recordService = Intent(requireActivity(), RecordService::class.java)
         recordService.putExtra("originalName", originalName)
-        requireActivity().startService(recordService)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            requireActivity().startForegroundService(recordService)
+        } else {
+            requireActivity().startService(recordService)
+        }
     }
 
     // 정지 = 아예 정지하고 파일을 저장함.

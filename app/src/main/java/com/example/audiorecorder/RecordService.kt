@@ -1,5 +1,8 @@
 package com.example.audiorecorder
 
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.media.MediaRecorder
@@ -8,16 +11,20 @@ import android.os.Environment
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
-import com.example.audiorecorder.views.MainFragment
+import androidx.core.app.NotificationCompat
+import com.example.audiorecorder.views.MainActivity
 
 class RecordService : Service() {
 
     companion object {
         private const val TAG: String = "로그"
+        const val CHANNEL_ID = "com.example.audiorecorder.record"
     }
     private lateinit var recorder: MediaRecorder
     private lateinit var originalName: String
     private lateinit var directoryOfVoice: String
+    private lateinit var notification: Notification
+    private lateinit var notificationManager: NotificationManager
 
     override fun onCreate() {
         Log.d(TAG,"RecordService - onCreate() called")
@@ -31,7 +38,9 @@ class RecordService : Service() {
             originalName = name
         }
 
+        setNotification()
         setRecorder(originalName)
+        startForeground(1, notification)
         startRecorder()
 
         return super.onStartCommand(intent, flags, startId)
@@ -45,6 +54,7 @@ class RecordService : Service() {
     override fun onDestroy() {
         Log.d(TAG,"RecordService - onDestroy() called")
         super.onDestroy()
+
         try {
             recorder.reset()
             recorder.release()
@@ -81,5 +91,21 @@ class RecordService : Service() {
 
     private fun startRecorder() {
         recorder.start()
+    }
+
+    private fun setNotification() {
+        val intent = Intent(baseContext, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            baseContext,
+            1,
+            intent,
+            if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+        )
+
+        notification = NotificationCompat.Builder(this.baseContext, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_background)
+            .setContentTitle("녹음중입니다.")
+            .setContentIntent(pendingIntent)
+            .build()
     }
 }
