@@ -2,7 +2,6 @@ package com.example.audiorecorder.views
 
 import android.Manifest
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
@@ -26,14 +25,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.example.audiorecorder.R
+import com.example.audiorecorder.RecordService
 import com.example.audiorecorder.databinding.FragmentMainBinding
 import com.example.audiorecorder.viewmodels.VoiceViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 
 class MainFragment : Fragment() {
 
@@ -121,6 +119,7 @@ class MainFragment : Fragment() {
     // 녹음 시작
     private fun startRecord() {
         Log.d(TAG,"MainFragment - startRecord() called")
+        requireActivity().startService(Intent(requireActivity(), RecordService::class.java))
 
         // if : 권한 부여 안했으면 -> 녹음 안함.
         recorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
