@@ -4,9 +4,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaRecorder
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
@@ -41,7 +39,7 @@ class MainFragment : Fragment() {
 
     private lateinit var binding: FragmentMainBinding
     private lateinit var viewModel: VoiceViewModel
-    private lateinit var recorder: MediaRecorder
+    private lateinit var recordService: Intent
     private lateinit var directoryOfVoice: String
     private lateinit var intentOfPickAudio: ActivityResultLauncher<String>
     private lateinit var originalName: String
@@ -57,7 +55,7 @@ class MainFragment : Fragment() {
         viewModel = VoiceViewModel()
         // 음성파일 저장할 공간
         directoryOfVoice = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
-        registerIntent()
+        registerIntentForPickAudio()
     }
 
     override fun onCreateView(
@@ -92,7 +90,7 @@ class MainFragment : Fragment() {
             binding.buttonRecordVoiceButton.visibility = View.VISIBLE
         }
 
-        // 녹음 파일 업로드
+        // 녹음할 오디오 파일의 URI 조회
         binding.buttonUploadVoice.setOnClickListener {
             getAudioURI()
         }
@@ -119,33 +117,10 @@ class MainFragment : Fragment() {
     // 녹음 시작
     private fun startRecord() {
         Log.d(TAG,"MainFragment - startRecord() called")
-        requireActivity().startService(Intent(requireActivity(), RecordService::class.java))
-
-        // if : 권한 부여 안했으면 -> 녹음 안함.
-        recorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            MediaRecorder(requireContext())
-        } else {
-            MediaRecorder()
-        }
-
-        // 저장 될 파일 명
         originalName = "${System.currentTimeMillis()}.mp3"
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
-        recorder.setOutputFile("$directoryOfVoice/$originalName")
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
-
-        Log.d(TAG,"MainFragment - 파일 이름 ${directoryOfVoice + originalName}")
-
-        try {
-            recorder.prepare()
-        } catch (e: Exception) {
-            Log.w(TAG, "startRecord: ", e)
-            Toast.makeText(requireContext(), "레코더 준비 실패", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        recorder.start()
+        recordService = Intent(requireActivity(), RecordService::class.java)
+        recordService.putExtra("originalName", originalName)
+        requireActivity().startService(recordService)
     }
 
     // 정지 = 아예 정지하고 파일을 저장함.
@@ -153,9 +128,7 @@ class MainFragment : Fragment() {
         Log.d(TAG,"MainFragment - stopRecord() called")
 
         try {
-            recorder.reset()
-            recorder.release()
-
+            requireActivity().stopService(recordService)
             val editViewForFileName = EditText(requireContext())
             editViewForFileName.maxLines = 1
             editViewForFileName.inputType = InputType.TYPE_CLASS_TEXT
@@ -182,7 +155,7 @@ class MainFragment : Fragment() {
         val dir = File(directoryOfVoice)
         if (!dir.exists()) {
             Log.d(TAG,"MainFragment - dir not exist() called")
-            return
+            dir.mkdirs()
         }
 
         val from = File(dir, originalName)
@@ -212,7 +185,7 @@ class MainFragment : Fragment() {
     }
 
     // 오디오 파일 URI 조회 및 업로드를 위해 시작할 인텐트 초기화.
-    private fun registerIntent() {
+    private fun registerIntentForPickAudio() {
         Log.d(TAG,"MainFragment - registerIntent() called")
         val intent = Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
         intent.type = "audio/*"
