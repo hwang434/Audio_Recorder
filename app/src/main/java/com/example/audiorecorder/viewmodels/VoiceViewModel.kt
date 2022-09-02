@@ -11,22 +11,20 @@ import com.example.audiorecorder.domain.StorageDao
 import com.example.audiorecorder.dto.Voice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class VoiceViewModel : ViewModel() {
-    private val liveDataOfVoices = MutableLiveData<List<Voice>>()
-    val _liveDataOfVoices: LiveData<List<Voice>>
-    get() = liveDataOfVoices
-    val uriOfVoice = flow<Uri> {
-//        emit(getUriOfVoice(uri))
-    }
+
 
     companion object {
         private const val TAG: String = "로그"
     }
 
+    private val liveDataOfVoices = MutableLiveData<List<Voice>>()
+    val _liveDataOfVoices: LiveData<List<Voice>>
+        get() = liveDataOfVoices
     private val storageReference: IStorageDao by lazy { StorageDao() }
+
 
     // uri 에 위치한 음성을 업로드함.
     suspend fun uploadVoice(uri: Uri) {
