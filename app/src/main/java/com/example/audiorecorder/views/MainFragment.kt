@@ -42,23 +42,19 @@ class MainFragment : Fragment() {
     }
 
     private lateinit var binding: FragmentMainBinding
-    private lateinit var viewModel: VoiceViewModel
+    private val voiceViewModel: VoiceViewModel by viewModels()
     private lateinit var recordService: Intent
     private lateinit var directoryOfVoice: String
     private lateinit var intentOfPickAudio: ActivityResultLauncher<String>
     private lateinit var originalName: String
-    private lateinit var aBuilder: AlertDialog.Builder
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG,"MainFragment - onCreate() called")
         super.onCreate(savedInstanceState)
-        // 파일 명 작명용 알림창 빌더
-        aBuilder = AlertDialog.Builder(requireContext())
-        // 뷰모델 초기화
-        viewModel = VoiceViewModel()
-        // 음성파일 저장할 공간
-        directoryOfVoice = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
+        // 음성파일 저장할 공간 세팅
+        setDirectoryOfVoice()
+        // 파일을 찾을 인텐트 실행
         registerIntentForPickAudio()
     }
 
@@ -141,25 +137,24 @@ class MainFragment : Fragment() {
     private fun stopRecord() {
         Log.d(TAG,"MainFragment - stopRecord() called")
 
-        try {
-            requireActivity().stopService(recordService)
-            val editViewForFileName = EditText(requireContext())
-            editViewForFileName.maxLines = 1
-            editViewForFileName.inputType = InputType.TYPE_CLASS_TEXT
-            aBuilder.apply {
-                setTitle("파일명을 입력해주세요.")
-                setView(editViewForFileName)
-                setPositiveButton("결정") { _, _ ->
-                    setFileName("${editViewForFileName.text}.mp3")
-                }
+    // 녹음 파일 제목을 정해주는 alertDialog 리턴
+    private fun createFileNameAlert(): AlertDialog? {
+        requireActivity().stopService(recordService)
+        val editViewForFileName = EditText(requireContext())
+        editViewForFileName.maxLines = 1
+        editViewForFileName.inputType = InputType.TYPE_CLASS_TEXT
+
+        val aBuilder = AlertDialog.Builder(requireContext())
+        aBuilder.apply {
+            setTitle("파일명을 입력해주세요.")
+            setView(editViewForFileName)
+            setPositiveButton("결정") { _, _ ->
+                setFileName("${editViewForFileName.text}.mp3")
             }
-            aBuilder.setTitle("파일명을 뭐라고 지으시겠습니다./")
-            aBuilder.create().show()
-        } catch (e: UninitializedPropertyAccessException) {
-            Log.w(TAG, "stopRecord: recorder 가 아직 초기화되지 않음", e)
-        } catch (e: Exception) {
-            Log.w(TAG, "stopRecord: ", e)
         }
+        aBuilder.setTitle("파일명을 뭐라고 지으시겠습니다./")
+
+        return aBuilder.create()
     }
 
     // 사용자가 웝하는 이름으로 파일명을 변경
@@ -172,7 +167,9 @@ class MainFragment : Fragment() {
             dir.mkdirs()
         }
 
+        // 현재 저장된 파일명
         val from = File(dir, originalName)
+        // 바꿀 파일명
         val to = File(dir, fileName)
         from.renameTo(to)
     }
@@ -186,8 +183,8 @@ class MainFragment : Fragment() {
     // 오디오 파일 업로드
     private fun uploadVoice(uri: Uri) {
         try {
-            viewModel.viewModelScope.launch(Dispatchers.IO) {
-                viewModel.uploadVoice(uri)
+            voiceViewModel.viewModelScope.launch(Dispatchers.IO) {
+                voiceViewModel.uploadVoice(uri)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(requireContext(), "오디오 파일 업로드에 성공했습니다.", Toast.LENGTH_SHORT).show()
                 }
