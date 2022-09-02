@@ -36,7 +36,7 @@ class VoiceListFragment : Fragment(), MediaPlayer.OnPreparedListener {
 
     private fun setObserver() {
         Log.d(TAG,"VoiceListFragment - setObserver() called")
-        voiceViewModel._liveDataOfVoices.observe(this) {
+        voiceViewModel.voices.observe(this) {
             Log.d(TAG,"VoiceListFragment - setObserver() data is changed")
 
             //////////////////////////////////////////////
@@ -59,7 +59,7 @@ class VoiceListFragment : Fragment(), MediaPlayer.OnPreparedListener {
 
     private fun setRecyclerView() {
         Log.d(TAG,"VoiceListFragment - setRecyclerView() called")
-        val adapter = VoiceRecyclerViewAdapter(voiceViewModel._liveDataOfVoices) {
+        val adapter = VoiceRecyclerViewAdapter(voiceViewModel.voices) {
             startVoice(Uri.parse(it))
         }
 

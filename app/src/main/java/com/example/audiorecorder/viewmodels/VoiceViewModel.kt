@@ -20,9 +20,9 @@ class VoiceViewModel : ViewModel() {
         private const val TAG: String = "로그"
     }
 
-    private val liveDataOfVoices = MutableLiveData<List<Voice>>()
-    val _liveDataOfVoices: LiveData<List<Voice>>
-        get() = liveDataOfVoices
+    private val _voices = MutableLiveData<List<Voice>>()
+    val voices: LiveData<List<Voice>>
+        get() = this._voices
     private val storageReference: IStorageDao by lazy { StorageDao() }
 
 
@@ -34,10 +34,11 @@ class VoiceViewModel : ViewModel() {
 
     // 모든 음성 목록을 가져옴
     fun getAllVoices() {
+        Log.d(TAG,"VoiceViewModel - getAllVoices() called")
         viewModelScope.launch(Dispatchers.IO) {
             val listOfVoice = storageReference.getAllVoices()
             Log.d(TAG,"VoiceViewModel - $listOfVoice")
-            liveDataOfVoices.postValue(listOfVoice)
+            _voices.postValue(listOfVoice)
         }
     }
 
