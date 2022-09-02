@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/button_stop_record.xml" value="0.6255" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.42399049881235157" />
         <entry key="app/src/main/res/layout/fragment_main.xml" value="0.5855106888361045" />
         <entry key="app/src/main/res/layout/fragment_voice_item.xml" value="0.5135416666666667" />
