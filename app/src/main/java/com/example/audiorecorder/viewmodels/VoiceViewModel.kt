@@ -24,7 +24,18 @@ class VoiceViewModel : ViewModel() {
     val voices: LiveData<List<Voice>>
         get() = this._voices
     private val storageReference: IStorageDao by lazy { StorageDao() }
+    // 타이머 시작 시각
+    private val _statTime = MutableLiveData<Resource<Long>>()
+    val startTime: LiveData<Resource<Long>>
+        get() = _statTime
+    // 녹음 중이면 true 아니면 false
+    private val _isRecording = MutableLiveData<Boolean>()
+    val isRecording: LiveData<Boolean>
+        get() = _isRecording
 
+    init {
+        _isRecording.value = false
+    }
 
     // uri 에 위치한 음성을 업로드함.
     suspend fun uploadVoice(uri: Uri) {
