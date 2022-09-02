@@ -122,6 +122,11 @@ class MainFragment : Fragment() {
     private fun startRecord() {
         Log.d(TAG,"MainFragment - startRecord() called")
         originalName = "${System.currentTimeMillis()}.mp3"
+        startRecordService()
+    }
+
+    // 녹음 서비스 실행
+    private fun startRecordService() {
         recordService = Intent(requireActivity(), RecordService::class.java)
         recordService.putExtra("originalName", originalName)
 
