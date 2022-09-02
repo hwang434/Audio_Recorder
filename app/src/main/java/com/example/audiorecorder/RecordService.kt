@@ -24,7 +24,6 @@ class RecordService : Service() {
     private lateinit var originalName: String
     private lateinit var directoryOfVoice: String
     private lateinit var notification: Notification
-    private lateinit var notificationManager: NotificationManager
 
     override fun onCreate() {
         Log.d(TAG,"RecordService - onCreate() called")
