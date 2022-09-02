@@ -1,4 +1,4 @@
-package com.example.audiorecorder.views
+package com.example.audiorecorder.adapter
 
 import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModelStore
 import com.example.audiorecorder.R
 import com.example.audiorecorder.databinding.FragmentVoiceItemBinding
 import com.example.audiorecorder.dto.Voice
@@ -15,7 +14,9 @@ class VoiceRecyclerViewAdapter(
     private val livedataOfVoices: LiveData<List<Voice>>,
     private val callBack: (uri: String?) -> Unit
 ) : RecyclerView.Adapter<VoiceRecyclerViewAdapter.ViewHolder>() {
-    private val TAG: String = "로그"
+    companion object {
+        private const val TAG: String = "로그"
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         Log.d(TAG,"VoiceRecyclerViewAdapter - onCreateViewHolder() called")
@@ -42,9 +43,5 @@ class VoiceRecyclerViewAdapter(
         return livedataOfVoices.value?.size ?: 0
     }
 
-    inner class ViewHolder(val binding: FragmentVoiceItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        init {
-//            binding.root.
-        }
-    }
+    inner class ViewHolder(val binding: FragmentVoiceItemBinding) : RecyclerView.ViewHolder(binding.root)
 }

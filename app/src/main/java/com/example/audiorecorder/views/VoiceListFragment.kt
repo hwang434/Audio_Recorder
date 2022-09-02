@@ -13,6 +13,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.audiorecorder.R
+import com.example.audiorecorder.adapter.VoiceRecyclerViewAdapter
 import com.example.audiorecorder.databinding.FragmentVoiceListBinding
 import com.example.audiorecorder.viewmodels.VoiceViewModel
 import kotlinx.coroutines.Dispatchers
