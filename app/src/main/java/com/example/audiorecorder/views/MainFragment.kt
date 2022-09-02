@@ -24,7 +24,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.example.audiorecorder.R
-import com.example.audiorecorder.RecordService
+import com.example.audiorecorder.service.RecordService
 import com.example.audiorecorder.databinding.FragmentMainBinding
 import com.example.audiorecorder.utils.TimerDateFormat
 import com.example.audiorecorder.viewmodels.VoiceViewModel

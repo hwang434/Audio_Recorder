@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import android.util.Log
+import com.example.audiorecorder.service.RecordService
 
 class AudioRecordApp: Application() {
 
@@ -22,7 +23,8 @@ class AudioRecordApp: Application() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(RecordService.CHANNEL_ID,
+            val notificationChannel = NotificationChannel(
+                RecordService.CHANNEL_ID,
                 "녹음용 알림",
                 NotificationManager.IMPORTANCE_DEFAULT
             )

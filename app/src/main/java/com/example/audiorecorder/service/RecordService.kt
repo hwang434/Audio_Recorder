@@ -1,7 +1,6 @@
-package com.example.audiorecorder
+package com.example.audiorecorder.service
 
 import android.app.Notification
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
@@ -12,6 +11,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import com.example.audiorecorder.R
 import com.example.audiorecorder.views.MainActivity
 
 class RecordService : Service() {
@@ -98,7 +98,7 @@ class RecordService : Service() {
             baseContext,
             1,
             intent,
-            if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+            PendingIntent.FLAG_IMMUTABLE
         )
 
         notification = NotificationCompat.Builder(this.baseContext, CHANNEL_ID)
