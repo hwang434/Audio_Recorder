@@ -15,53 +15,70 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/current_time_placeholder"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.23" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_record_voice_button"
-            android:layout_width="250dp"
-            android:layout_height="70dp"
-            android:text="@string/record_start_button"
+            android:textSize="25sp"
+            android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/button_stop_record"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textview_ongoing_time"
-            app:layout_constraintVertical_bias="0.341"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_stop_record"
-            android:layout_width="250dp"
-            android:layout_height="70dp"
-            android:text="@string/record_stop_button"
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/button_record_voice_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_record_start"
+            android:minWidth="150dp"
+            android:minHeight="150dp"
+            android:text="@string/record_start_button"
             app:layout_constraintBottom_toTopOf="@+id/button_to_voice_list"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button_record_voice_button"
-            android:visibility="gone" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_to_voice_list"
-            android:layout_width="250dp"
-            android:layout_height="70dp"
-            android:text="@string/button_to_voice_list"
-            app:layout_constraintBottom_toTopOf="@+id/button_upload_voice"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/button_stop_record" />
+
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/button_stop_record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_stop_record"
+            android:minWidth="150dp"
+            android:minHeight="150dp"
+            android:text="@string/record_stop_button"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/button_record_voice_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textview_ongoing_time" />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/button_to_voice_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_view_record_list"
+            android:minWidth="150dp"
+            android:minHeight="150dp"
+            android:text="@string/button_to_voice_list"
+            app:layout_constraintBottom_toTopOf="@+id/button_upload_voice"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button_record_voice_button" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/button_upload_voice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="40dp"
+            android:minWidth="70dp"
+            android:minHeight="70dp"
+            android:layout_margin="30dp"
+            app:maxImageSize="56dp"
             android:contentDescription="@string/upload_content_description"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:src="@drawable/button_upload_voice"
+            android:scaleType="center"
+            android:backgroundTint="@android:color/background_light"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
