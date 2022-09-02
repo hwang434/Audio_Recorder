@@ -196,9 +196,6 @@ class MainFragment : Fragment() {
     // 오디오 파일 URI 조회 및 업로드를 위해 시작할 인텐트 초기화.
     private fun registerIntentForPickAudio() {
         Log.d(TAG,"MainFragment - registerIntent() called")
-        val intent = Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
-        intent.type = "audio/*"
-
         intentOfPickAudio = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             Log.d(TAG,"MainFragment - uri : $uri")
             uri?.let { it ->
