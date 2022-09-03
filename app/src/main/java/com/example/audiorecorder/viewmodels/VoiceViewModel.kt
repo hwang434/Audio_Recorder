@@ -31,6 +31,10 @@ class VoiceViewModel : ViewModel() {
     private val _isRecording = MutableLiveData<Boolean>()
     val isRecording: LiveData<Boolean>
         get() = _isRecording
+    // 음악 링크
+    private val _linkOfVoice = MutableLiveData<Resource<Voice>>()
+    val linkOfVoice: LiveData<Resource<Voice>>
+        get() = _linkOfVoice
 
     init {
         _isRecording.value = false
@@ -39,7 +43,7 @@ class VoiceViewModel : ViewModel() {
     // uri 에 위치한 음성을 업로드함.
     suspend fun uploadVoice(uri: Uri) {
         Log.d(TAG,"VoiceViewModel - uploadVoice() called")
-        delay(3000)
+        delay(1000)
         storageReference.uploadVoice(uri)
     }
 
@@ -48,15 +52,20 @@ class VoiceViewModel : ViewModel() {
         Log.d(TAG,"VoiceViewModel - getAllVoices() called")
         viewModelScope.launch(Dispatchers.IO) {
             val listOfVoice = storageReference.getAllVoices()
-            Log.d(TAG,"VoiceViewModel - $listOfVoice")
             _voices.postValue(listOfVoice)
         }
     }
 
     // 음성 라이브 스트리밍
-    suspend fun getDownloadLinkOfVoice(uri: Uri): Uri {
-        Log.d(TAG,"VoiceViewModel - getDownloadLinkOfVoice() called")
-        return storageReference.getDownloadLinkOfVoice(uri)
+    fun refreshLinkOfVoice(title: String, uri: Uri) {
+        Log.d(TAG,"VoiceViewModel - refreshLinkOfVoice() called")
+        _linkOfVoice.postValue(Resource.Loading())
+        viewModelScope.launch(Dispatchers.IO) {
+            val downloadLink = storageReference.getDownloadLinkOfVoice(uri)
+            withContext(Dispatchers.Main) {
+                _linkOfVoice.postValue(Resource.Success(Voice(fileName = title, uri = downloadLink.toString())))
+            }
+        }
     }
 
     fun startTimer(time: Long) {
@@ -69,10 +78,9 @@ class VoiceViewModel : ViewModel() {
     private fun changeRecordingStatus() {
         Log.d(TAG,"VoiceViewModel - changeRecordingStatus() called")
         _isRecording.value = !(_isRecording.value!!)
-        Log.d(TAG,"VoiceViewModel - _isRecording.value : ${_isRecording.value}() called")
     }
 
-    // 음성 녹음을 시작한 시각을 계속 post해서 UI를 업데이트함.
+    // 음성 녹음을 시작한 시각을 계속 "post"해서 UI를 업데이트함.
     private fun updateStartTime(time: Long) {
         Log.d(TAG,"VoiceViewModel - updateStartTime() called")
 
@@ -87,7 +95,7 @@ class VoiceViewModel : ViewModel() {
     }
 
     fun stopTimer() {
-        Log.d(TAG,"VoiceViewModel - stopTimer()  isRecoring.value : ${_isRecording.value}called")
+        Log.d(TAG,"VoiceViewModel - stopTimer() called")
         _isRecording.value = false
         _statTime.value = Resource.Success(0)
     }

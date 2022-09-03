@@ -12,7 +12,7 @@ import com.example.audiorecorder.dto.Voice
 
 class VoiceRecyclerViewAdapter(
     private val livedataOfVoices: LiveData<List<Voice>>,
-    private val callBack: (uri: String?) -> Unit
+    private val callBack: (title: String, uri: String?) -> Unit
 ) : RecyclerView.Adapter<VoiceRecyclerViewAdapter.ViewHolder>() {
     companion object {
         private const val TAG: String = "로그"
@@ -34,7 +34,7 @@ class VoiceRecyclerViewAdapter(
         holder.binding.textviewNameOfVoice.text = item?.fileName
         holder.binding.apply {
             buttonPlay.setOnClickListener {
-                callBack(livedataOfVoices.value?.get(position)?.uri)
+                callBack(textviewNameOfVoice.text.toString(), livedataOfVoices.value?.get(position)?.uri)
             }
         }
     }
