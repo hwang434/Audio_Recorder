@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Audio Recorder</string>
+    <string name="current_time_placeholder">00:00</string>
+    <string name="upload_content_description">녹음 파일 업로드</string>
+    <string name="record_start_button">녹음 시작</string>
+    <string name="record_stop_button">녹음 중지</string>
+    <string name="button_to_voice_list">녹음 목록으로</string>
+    <string name="placeholder_voice_title">음성 파일 제목</string>
 </resources>
