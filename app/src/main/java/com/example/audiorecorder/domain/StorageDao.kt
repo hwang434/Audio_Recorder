@@ -41,20 +41,16 @@ class StorageDao: IStorageDao {
         val listOfVoice = mutableListOf<Voice>()
 
         listOfResult.items.forEach { item ->
-            Log.d(TAG,"StorageDao - item.name ${item.name}\nitem.storage : ${item.storage}\nitem.toString : ${item.toString()}")
+            Log.d(TAG,"StorageDao - item.name ${item.name}\nitem.storage : ${item.storage}\nitem.toString : $item")
             listOfVoice.add(Voice(fileName = item.name, author = item.parent?.name.toString(), uri = item.toString()))
         }
 
         return listOfVoice
     }
 
-    // uri 파일 재생
     override suspend fun getDownloadLinkOfVoice(uri: Uri): Uri {
-        Log.d(TAG,"StorageDao - getDownloadLinkOfVoice() called")
-        Log.d(TAG,"StorageDao - uri.toString() : $uri")
+        Log.d(TAG,"StorageDao - getDownloadLinkOfVoice(uri = $uri) called")
 
-
-        Log.d(TAG,"StorageDao - uri.decode : ${Uri.decode(uri.toString())}")
         val gsReference = FirebaseStorage.getInstance().getReferenceFromUrl(Uri.decode(uri.toString()))
         val task = gsReference.downloadUrl
         task.await()
