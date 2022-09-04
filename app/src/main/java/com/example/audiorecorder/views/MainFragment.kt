@@ -2,6 +2,7 @@ package com.example.audiorecorder.views
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -15,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
@@ -45,8 +47,23 @@ class MainFragment : Fragment() {
     private lateinit var recordService: Intent
     private lateinit var directoryOfVoice: String
     private lateinit var intentOfPickAudio: ActivityResultLauncher<String>
+    private var lastClickedTime = 0L
+    private val activityEndCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            if (lastClickedTime + 2000 > System.currentTimeMillis()) {
+                requireActivity().finish()
+                stopRecord()
+            }
+            lastClickedTime = System.currentTimeMillis()
+            Toast.makeText(requireContext(), "If you want to exit application. Tab the button twice.", Toast.LENGTH_SHORT).show()
+        }
+    }
 
-
+    override fun onAttach(context: Context) {
+        Log.d(TAG,"MainFragment - onAttach() called")
+        super.onAttach(context)
+        requireActivity().onBackPressedDispatcher.addCallback(this, activityEndCallback)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG,"MainFragment - onCreate() called")
         super.onCreate(savedInstanceState)
