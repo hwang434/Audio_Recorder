@@ -37,6 +37,7 @@ class MainFragment : Fragment() {
 
     companion object {
         private const val TAG: String = "로그"
+        private var originalName: String = ""
     }
 
     private lateinit var binding: FragmentMainBinding
@@ -44,7 +45,6 @@ class MainFragment : Fragment() {
     private lateinit var recordService: Intent
     private lateinit var directoryOfVoice: String
     private lateinit var intentOfPickAudio: ActivityResultLauncher<String>
-    private lateinit var originalName: String
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +54,12 @@ class MainFragment : Fragment() {
         setDirectoryOfVoice()
         // 파일을 찾을 인텐트 실행
         registerIntentForPickAudio()
+        setRecordService()
         setObserver()
+    }
+
+    private fun setRecordService() {
+        recordService = Intent(requireActivity(), RecordService::class.java)
     }
 
     override fun onCreateView(
@@ -72,7 +77,6 @@ class MainFragment : Fragment() {
     override fun onDestroy() {
         Log.d(TAG,"MainFragment - onDestroy() called")
         super.onDestroy()
-        requireActivity().stopService(recordService)
     }
 
     // 음성을 저장할 폴더 설정. 현재 다운로드 폴더로 되어 있음.
@@ -174,6 +178,7 @@ class MainFragment : Fragment() {
         Log.d(TAG,"MainFragment - startRecord() called")
         val startTime = System.currentTimeMillis()
         originalName = "$startTime.mp3"
+        recordService.putExtra("originalName", originalName)
         // 녹음 서비스 실행
         startRecordService()
         // 녹음 시작 시각 업데이트 및 상태 변경
@@ -192,9 +197,6 @@ class MainFragment : Fragment() {
 
     // 녹음 서비스 실행
     private fun startRecordService() {
-        recordService = Intent(requireActivity(), RecordService::class.java)
-        recordService.putExtra("originalName", originalName)
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             requireActivity().startForegroundService(recordService)
         } else {
