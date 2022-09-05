@@ -62,8 +62,13 @@ class MainFragment : Fragment() {
     override fun onAttach(context: Context) {
         Log.d(TAG,"MainFragment - onAttach() called")
         super.onAttach(context)
+        addBackPressCallBack()
+    }
+
+    private fun addBackPressCallBack() {
         requireActivity().onBackPressedDispatcher.addCallback(this, activityEndCallback)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG,"MainFragment - onCreate() called")
         super.onCreate(savedInstanceState)
