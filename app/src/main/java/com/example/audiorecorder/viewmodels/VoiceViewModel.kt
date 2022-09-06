@@ -42,6 +42,11 @@ class VoiceViewModel : ViewModel() {
     val linkOfVoiceToDelete: LiveData<Resource<Int>>
         get() = _linkOfVoiceToDelete
 
+    // Check upload status.
+    private val _isUploadingDone = MutableLiveData<Resource<Boolean>>()
+    val isUploadingDone: LiveData<Resource<Boolean>>
+        get() = _isUploadingDone
+
     // coroutine Exception Handler
     private val handler = CoroutineExceptionHandler { _, throwable ->
         when (throwable) {
@@ -67,10 +72,13 @@ class VoiceViewModel : ViewModel() {
     }
 
     // uri 에 위치한 음성을 업로드함.
-    suspend fun uploadVoice(uri: Uri, fileName: String) {
+    fun uploadVoice(uri: Uri, fileName: String) {
         Log.d(TAG,"VoiceViewModel - uploadVoice(uri = $uri) called")
-        delay(1000)
-        storageReference.uploadVoice(uri, fileName)
+        _isUploadingDone.postValue(Resource.Loading())
+        viewModelScope.launch(Dispatchers.IO + handler) {
+            val resource = storageReference.uploadVoice(uri, fileName)
+            _isUploadingDone.postValue(resource)
+        }
     }
 
     // 모든 음성 목록을 가져옴
