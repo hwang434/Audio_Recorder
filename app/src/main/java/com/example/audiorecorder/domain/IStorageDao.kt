@@ -7,4 +7,5 @@ interface IStorageDao {
     suspend fun uploadVoice(uri: Uri): Boolean
     suspend fun getAllVoices(): MutableList<Voice>
     suspend fun getDownloadLinkOfVoice(uri: Uri): Uri
+    suspend fun deleteVoice(fileName: String): Boolean
 }

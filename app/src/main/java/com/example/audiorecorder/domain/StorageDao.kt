@@ -50,10 +50,18 @@ class StorageDao: IStorageDao {
 
     override suspend fun getDownloadLinkOfVoice(uri: Uri): Uri {
         Log.d(TAG,"StorageDao - getDownloadLinkOfVoice(uri = $uri) called")
-
         val gsReference = FirebaseStorage.getInstance().getReferenceFromUrl(Uri.decode(uri.toString()))
         val task = gsReference.downloadUrl
         task.await()
+
         return task.result
+    }
+
+    override suspend fun deleteVoice(fileName: String): Boolean {
+        Log.d(TAG,"StorageDao - deleteVoice() called")
+        val task = storageReference.child(voiceDirectory).child(fileName).delete()
+        task.await()
+
+        return task.isSuccessful
     }
 }

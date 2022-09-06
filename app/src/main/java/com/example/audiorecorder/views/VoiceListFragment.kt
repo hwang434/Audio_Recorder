@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -74,6 +75,26 @@ class VoiceListFragment : Fragment() {
                 }
             }
         }
+
+        voiceViewModel.linkOfVoiceToDelete.observe(this) {
+            when (it) {
+                is Resource.Success -> {
+                    Toast.makeText(requireContext(), "File is deleted.", Toast.LENGTH_SHORT).show()
+                    val position = it.data!!
+                    binding.list.adapter?.notifyItemRemoved(position)
+                    binding.list.adapter?.notifyItemRangeChanged(position, voiceViewModel.voices.value!!.size - position)
+                    val list = voiceViewModel.voices.value!!
+                    list.removeAt(position)
+                }
+                is Resource.Error -> {
+                    Log.w(TAG, it.message.toString())
+                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                }
+                is Resource.Loading -> {
+                    Toast.makeText(requireContext(), "Loading..", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -89,10 +110,7 @@ class VoiceListFragment : Fragment() {
             },
             { position, fileName ->
                 Log.d(TAG,"VoiceListFragment - position : $position fileName : $fileName called")
-                binding.list.adapter?.notifyItemRemoved(position)
-                binding.list.adapter?.notifyItemRangeChanged(position, voiceViewModel.voices.value!!.size - position)
-                val list = voiceViewModel.voices.value!!
-                list.removeAt(position)
+                voiceViewModel.deleteVoice(position, fileName)
             }
         )
 
