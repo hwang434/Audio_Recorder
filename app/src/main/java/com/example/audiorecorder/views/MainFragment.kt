@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.OpenableColumns
 import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
@@ -23,16 +24,14 @@ import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.example.audiorecorder.R
 import com.example.audiorecorder.service.RecordService
 import com.example.audiorecorder.databinding.FragmentMainBinding
+import com.example.audiorecorder.utils.Resource
 import com.example.audiorecorder.utils.TimerDateFormat
+import com.example.audiorecorder.utils.ToastMessage
 import com.example.audiorecorder.viewmodels.VoiceViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 
 class MainFragment : Fragment() {
@@ -65,10 +64,6 @@ class MainFragment : Fragment() {
         addBackPressCallBack()
     }
 
-    private fun addBackPressCallBack() {
-        requireActivity().onBackPressedDispatcher.addCallback(this, activityEndCallback)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG,"MainFragment - onCreate() called")
         super.onCreate(savedInstanceState)
@@ -80,9 +75,7 @@ class MainFragment : Fragment() {
         setObserver()
     }
 
-    private fun setRecordService() {
-        recordService = Intent(requireActivity(), RecordService::class.java)
-    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -100,24 +93,44 @@ class MainFragment : Fragment() {
         Log.d(TAG,"MainFragment - onDestroy() called")
         super.onDestroy()
     }
+    
+    private fun addBackPressCallBack() {
+        Log.d(TAG,"MainFragment - addBackPressCallBack() called")
+        requireActivity().onBackPressedDispatcher.addCallback(this, activityEndCallback)
+    }
+
+    private fun setRecordService() {
+        Log.d(TAG,"MainFragment - setRecordService() called")
+        recordService = Intent(requireActivity(), RecordService::class.java)
+    }
 
     // 음성을 저장할 폴더 설정. 현재 다운로드 폴더로 되어 있음.
     private fun setDirectoryOfVoice() {
+        Log.d(TAG,"MainFragment - setDirectoryOfVoice() called")
         directoryOfVoice = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
     }
 
     // 오디오 파일 URI 조회 및 업로드를 위해 시작할 인텐트 초기화.
     private fun registerIntentForPickAudio() {
-        Log.d(TAG,"MainFragment - registerIntent() called")
+        Log.d(TAG,"MainFragment - registerIntentForPickAudio() called")
         intentOfPickAudio = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             Log.d(TAG,"MainFragment - uri : $uri")
-            uri?.let { it ->
-                uploadVoice(it)
+            requireActivity().contentResolver.apply {
+                query(uri!!, null, null, null, null)?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    cursor.moveToFirst()
+                    cursor.getString(nameIndex)
+                }?.let { fileName ->
+                    Log.d(TAG,"MainFragment - uri : $uri() called")
+                    uploadVoice(uri, fileName)
+                }
             }
         }
     }
 
     private fun setObserver() {
+        Log.d(TAG,"MainFragment - setObserver() called")
+        // Refresh timer ui
         voiceViewModel.startTime.observe(this) { startTime ->
             Log.d(TAG,"MainFragment - setObserver() startTime : ${startTime.data} called")
             val time = if (startTime.data == 0L) {
@@ -129,6 +142,7 @@ class MainFragment : Fragment() {
             binding.textviewOngoingTime.text = time
         }
 
+        // Check is recording
         voiceViewModel.isRecording.observe(this) { isRecording ->
             // if : 녹음 중이면 녹음 버튼 보여주기.
             // else : 녹음 중이 아니면 정지 버튼 숨기기
@@ -140,9 +154,25 @@ class MainFragment : Fragment() {
                 binding.buttonStopRecord.visibility = View.GONE
             }
         }
+
+        // Check upload is done.
+        voiceViewModel.isUploadingDone.observe(this) {
+            when (it) {
+                is Resource.Loading -> {
+                    Toast.makeText(requireContext(), ToastMessage.loadingMessage, Toast.LENGTH_SHORT).show()
+                }
+                is Resource.Success -> {
+                    Toast.makeText(requireContext(), ToastMessage.successToUploadVoice, Toast.LENGTH_SHORT).show()
+                }
+                is Resource.Error -> {
+                    Toast.makeText(requireContext(), ToastMessage.errorMessage, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun initButton() {
+        Log.d(TAG,"MainFragment - initButton() called")
         // if : 뷰를 다시 그릴 때 만약 녹음 중이면, 녹음 버튼 없애고, 중지 버튼 그림.
         if (voiceViewModel.isRecording.value == true) {
             binding.buttonRecordVoiceButton.visibility = View.GONE
@@ -278,17 +308,8 @@ class MainFragment : Fragment() {
     }
 
     // 오디오 파일 업로드
-    private fun uploadVoice(uri: Uri) {
-        try {
-            voiceViewModel.viewModelScope.launch(Dispatchers.IO) {
-                voiceViewModel.uploadVoice(uri)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "오디오 파일 업로드에 성공했습니다.", Toast.LENGTH_SHORT).show()
-                }
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "uploadVoice: ", e)
-            Toast.makeText(requireContext(), "오디오 파일 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
-        }
+    private fun uploadVoice(uri: Uri, fileName: String = System.currentTimeMillis().toString()) {
+        Log.d(TAG,"MainFragment - uploadVoice(uri = $uri, fileName = $fileName) called")
+        voiceViewModel.uploadVoice(uri = uri, fileName)
     }
 }
