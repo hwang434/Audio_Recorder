@@ -93,15 +93,26 @@ class MainFragment : Fragment() {
         Log.d(TAG,"MainFragment - onDestroy() called")
         super.onDestroy()
     }
+    
+    private fun addBackPressCallBack() {
+        Log.d(TAG,"MainFragment - addBackPressCallBack() called")
+        requireActivity().onBackPressedDispatcher.addCallback(this, activityEndCallback)
+    }
+
+    private fun setRecordService() {
+        Log.d(TAG,"MainFragment - setRecordService() called")
+        recordService = Intent(requireActivity(), RecordService::class.java)
+    }
 
     // 음성을 저장할 폴더 설정. 현재 다운로드 폴더로 되어 있음.
     private fun setDirectoryOfVoice() {
+        Log.d(TAG,"MainFragment - setDirectoryOfVoice() called")
         directoryOfVoice = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).absolutePath
     }
 
     // 오디오 파일 URI 조회 및 업로드를 위해 시작할 인텐트 초기화.
     private fun registerIntentForPickAudio() {
-        Log.d(TAG,"MainFragment - registerIntent() called")
+        Log.d(TAG,"MainFragment - registerIntentForPickAudio() called")
         intentOfPickAudio = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             Log.d(TAG,"MainFragment - uri : $uri")
             requireActivity().contentResolver.apply {
@@ -118,6 +129,8 @@ class MainFragment : Fragment() {
     }
 
     private fun setObserver() {
+        Log.d(TAG,"MainFragment - setObserver() called")
+        // Refresh timer ui
         voiceViewModel.startTime.observe(this) { startTime ->
             Log.d(TAG,"MainFragment - setObserver() startTime : ${startTime.data} called")
             val time = if (startTime.data == 0L) {
@@ -129,6 +142,7 @@ class MainFragment : Fragment() {
             binding.textviewOngoingTime.text = time
         }
 
+        // Check is recording
         voiceViewModel.isRecording.observe(this) { isRecording ->
             // if : 녹음 중이면 녹음 버튼 보여주기.
             // else : 녹음 중이 아니면 정지 버튼 숨기기
@@ -158,6 +172,7 @@ class MainFragment : Fragment() {
     }
 
     private fun initButton() {
+        Log.d(TAG,"MainFragment - initButton() called")
         // if : 뷰를 다시 그릴 때 만약 녹음 중이면, 녹음 버튼 없애고, 중지 버튼 그림.
         if (voiceViewModel.isRecording.value == true) {
             binding.buttonRecordVoiceButton.visibility = View.GONE
