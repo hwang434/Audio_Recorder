@@ -82,10 +82,19 @@ class VoiceListFragment : Fragment() {
     }
 
     private fun setRecyclerView() {
-        Log.d(TAG,"VoiceListFragment - setRecyclerView() called")
-        val adapter = VoiceRecyclerViewAdapter(voiceViewModel.voices) { title, uri ->
-            refreshLinkOfVoice(title, Uri.parse(uri))
-        }
+        val adapter = VoiceRecyclerViewAdapter(
+            voiceViewModel.voices,
+            { title, uri ->
+                refreshLinkOfVoice(title, Uri.parse(uri))
+            },
+            { position, fileName ->
+                Log.d(TAG,"VoiceListFragment - position : $position fileName : $fileName called")
+                binding.list.adapter?.notifyItemRemoved(position)
+                binding.list.adapter?.notifyItemRangeChanged(position, voiceViewModel.voices.value!!.size - position)
+                val list = voiceViewModel.voices.value!!
+                list.removeAt(position)
+            }
+        )
 
         binding.list.adapter = adapter
         binding.list.layoutManager = LinearLayoutManager(requireContext())

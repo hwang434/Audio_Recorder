@@ -35,7 +35,7 @@ class StorageDao: IStorageDao {
         return true
     }
 
-    override suspend fun getAllVoices(): List<Voice> {
+    override suspend fun getAllVoices(): MutableList<Voice> {
         Log.d(TAG,"StorageDao - getAllVoices() called")
         val listOfResult = storageReference.child(voiceDirectory).listAll().await()
         val listOfVoice = mutableListOf<Voice>()
