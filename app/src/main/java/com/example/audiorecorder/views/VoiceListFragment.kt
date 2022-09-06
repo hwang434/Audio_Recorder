@@ -63,15 +63,19 @@ class VoiceListFragment : Fragment() {
             Log.d(TAG,"VoiceListFragment - linkOfVoice Changed() called")
             when (resource) {
                 is Resource.Success -> {
-                    resource.data?.fileName?.let { startMediaPlayerService(title = it, uri = Uri.parse(
-                        resource.data.uri
-                    )) }
+                    resource.data?.fileName?.let {
+                        startMediaPlayerService(
+                            title = it,
+                            uri = Uri.parse(resource.data.uri)
+                        )
+                    }
                 }
                 is Resource.Loading -> {
-
+                    Toast.makeText(requireContext(), "Loading..", Toast.LENGTH_SHORT).show()
                 }
                 is Resource.Error -> {
-
+                    Log.w(TAG, resource.message.toString())
+                    Toast.makeText(requireContext(), "System has a Problem.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
