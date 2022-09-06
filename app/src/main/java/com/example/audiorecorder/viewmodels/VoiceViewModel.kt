@@ -67,10 +67,10 @@ class VoiceViewModel : ViewModel() {
     }
 
     // uri 에 위치한 음성을 업로드함.
-    suspend fun uploadVoice(uri: Uri) {
-        Log.d(TAG,"VoiceViewModel - uploadVoice() called")
+    suspend fun uploadVoice(uri: Uri, fileName: String) {
+        Log.d(TAG,"VoiceViewModel - uploadVoice(uri = $uri) called")
         delay(1000)
-        storageReference.uploadVoice(uri)
+        storageReference.uploadVoice(uri, fileName)
     }
 
     // 모든 음성 목록을 가져옴

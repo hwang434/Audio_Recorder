@@ -13,13 +13,10 @@ class StorageDao: IStorageDao {
     private val voiceDirectory = "voices/"
     
     private val storageReference by lazy { FirebaseStorage.getInstance().reference }
-    override suspend fun uploadVoice(uri: Uri): Boolean {
+    override suspend fun uploadVoice(uri: Uri, fileName: String): Boolean {
         Log.d(TAG,"StorageDao - uploadVoice() called")
-
         // 저장될 디렉터리 명
         val directory = StringBuilder(voiceDirectory)
-        val fullFileName = uri.lastPathSegment?.split("/")
-        val fileName = fullFileName?.get(fullFileName.size - 1)
 
         directory.append(fileName)
         Log.d(TAG,"StorageDao - directory : $directory")

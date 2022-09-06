@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.OpenableColumns
 import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
@@ -111,8 +112,15 @@ class MainFragment : Fragment() {
         Log.d(TAG,"MainFragment - registerIntent() called")
         intentOfPickAudio = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             Log.d(TAG,"MainFragment - uri : $uri")
-            uri?.let { it ->
-                uploadVoice(it)
+            requireActivity().contentResolver.apply {
+                query(uri!!, null, null, null, null)?.use { cursor ->
+                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                    cursor.moveToFirst()
+                    cursor.getString(nameIndex)
+                }?.let { fileName ->
+                    Log.d(TAG,"MainFragment - uri : $uri() called")
+                    uploadVoice(uri, fileName)
+                }
             }
         }
     }
@@ -278,10 +286,11 @@ class MainFragment : Fragment() {
     }
 
     // 오디오 파일 업로드
-    private fun uploadVoice(uri: Uri) {
+    private fun uploadVoice(uri: Uri, fileName: String = System.currentTimeMillis().toString()) {
+        Log.d(TAG,"MainFragment - uploadVoice(uri = $uri, fileName = $fileName) called")
         try {
             voiceViewModel.viewModelScope.launch(Dispatchers.IO) {
-                voiceViewModel.uploadVoice(uri)
+                voiceViewModel.uploadVoice(uri, fileName = fileName)
                 withContext(Dispatchers.Main) {
                     Toast.makeText(requireContext(), "오디오 파일 업로드에 성공했습니다.", Toast.LENGTH_SHORT).show()
                 }
