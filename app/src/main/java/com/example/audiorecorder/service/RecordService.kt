@@ -77,7 +77,7 @@ class RecordService : Service() {
         // 저장 될 파일 명
         recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
         recorder.setOutputFile("$directoryOfVoice/$fileName")
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
 
         try {
