@@ -24,16 +24,14 @@ import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import com.example.audiorecorder.R
 import com.example.audiorecorder.service.RecordService
 import com.example.audiorecorder.databinding.FragmentMainBinding
+import com.example.audiorecorder.utils.Resource
 import com.example.audiorecorder.utils.TimerDateFormat
+import com.example.audiorecorder.utils.ToastMessage
 import com.example.audiorecorder.viewmodels.VoiceViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 
 class MainFragment : Fragment() {
@@ -66,10 +64,6 @@ class MainFragment : Fragment() {
         addBackPressCallBack()
     }
 
-    private fun addBackPressCallBack() {
-        requireActivity().onBackPressedDispatcher.addCallback(this, activityEndCallback)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG,"MainFragment - onCreate() called")
         super.onCreate(savedInstanceState)
@@ -81,9 +75,7 @@ class MainFragment : Fragment() {
         setObserver()
     }
 
-    private fun setRecordService() {
-        recordService = Intent(requireActivity(), RecordService::class.java)
-    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -146,6 +138,21 @@ class MainFragment : Fragment() {
             } else {
                 binding.buttonRecordVoiceButton.visibility = View.VISIBLE
                 binding.buttonStopRecord.visibility = View.GONE
+            }
+        }
+
+        // Check upload is done.
+        voiceViewModel.isUploadingDone.observe(this) {
+            when (it) {
+                is Resource.Loading -> {
+                    Toast.makeText(requireContext(), ToastMessage.loadingMessage, Toast.LENGTH_SHORT).show()
+                }
+                is Resource.Success -> {
+                    Toast.makeText(requireContext(), ToastMessage.successToUploadVoice, Toast.LENGTH_SHORT).show()
+                }
+                is Resource.Error -> {
+                    Toast.makeText(requireContext(), ToastMessage.errorMessage, Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -288,16 +295,6 @@ class MainFragment : Fragment() {
     // 오디오 파일 업로드
     private fun uploadVoice(uri: Uri, fileName: String = System.currentTimeMillis().toString()) {
         Log.d(TAG,"MainFragment - uploadVoice(uri = $uri, fileName = $fileName) called")
-        try {
-            voiceViewModel.viewModelScope.launch(Dispatchers.IO) {
-                voiceViewModel.uploadVoice(uri, fileName = fileName)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "오디오 파일 업로드에 성공했습니다.", Toast.LENGTH_SHORT).show()
-                }
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "uploadVoice: ", e)
-            Toast.makeText(requireContext(), "오디오 파일 업로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
-        }
+        voiceViewModel.uploadVoice(uri = uri, fileName)
     }
 }

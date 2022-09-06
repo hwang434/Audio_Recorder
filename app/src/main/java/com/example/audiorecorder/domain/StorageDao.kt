@@ -3,6 +3,7 @@ package com.example.audiorecorder.domain
 import android.net.Uri
 import android.util.Log
 import com.example.audiorecorder.dto.Voice
+import com.example.audiorecorder.utils.Resource
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
 
@@ -13,7 +14,7 @@ class StorageDao: IStorageDao {
     private val voiceDirectory = "voices/"
     
     private val storageReference by lazy { FirebaseStorage.getInstance().reference }
-    override suspend fun uploadVoice(uri: Uri, fileName: String): Boolean {
+    override suspend fun uploadVoice(uri: Uri, fileName: String): Resource<Boolean> {
         Log.d(TAG,"StorageDao - uploadVoice() called")
         // 저장될 디렉터리 명
         val directory = StringBuilder(voiceDirectory)
@@ -22,14 +23,13 @@ class StorageDao: IStorageDao {
         Log.d(TAG,"StorageDao - directory : $directory")
         val ref = storageReference.child("$directory")
 
-        ref.putFile(uri).addOnCompleteListener {
-            Log.d(TAG,"StorageDao - isSuccess : ${it.isSuccessful} called")
-            if (!it.isSuccessful) {
-                throw Exception("오디오 파일 업로드 실패")
-            }
+        val task = ref.putFile(uri)
+        task.await()
+        if (!task.isSuccessful) {
+            return Resource.Error(null, "Fail to Upload file.")
         }
 
-        return true
+        return  Resource.Success(true)
     }
 
     override suspend fun getAllVoices(): MutableList<Voice> {
