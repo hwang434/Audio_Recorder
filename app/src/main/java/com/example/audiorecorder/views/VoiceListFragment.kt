@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -62,15 +63,39 @@ class VoiceListFragment : Fragment() {
             Log.d(TAG,"VoiceListFragment - linkOfVoice Changed() called")
             when (resource) {
                 is Resource.Success -> {
-                    resource.data?.fileName?.let { startMediaPlayerService(title = it, uri = Uri.parse(
-                        resource.data.uri
-                    )) }
+                    resource.data?.fileName?.let {
+                        startMediaPlayerService(
+                            title = it,
+                            uri = Uri.parse(resource.data.uri)
+                        )
+                    }
                 }
                 is Resource.Loading -> {
-
+                    Toast.makeText(requireContext(), "Loading..", Toast.LENGTH_SHORT).show()
                 }
                 is Resource.Error -> {
+                    Log.w(TAG, resource.message.toString())
+                    Toast.makeText(requireContext(), "System has a Problem.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
+        voiceViewModel.linkOfVoiceToDelete.observe(this) {
+            when (it) {
+                is Resource.Success -> {
+                    Toast.makeText(requireContext(), "File is deleted.", Toast.LENGTH_SHORT).show()
+                    val position = it.data!!
+                    binding.list.adapter?.notifyItemRemoved(position)
+                    binding.list.adapter?.notifyItemRangeChanged(position, voiceViewModel.voices.value!!.size - position)
+                    val list = voiceViewModel.voices.value!!
+                    list.removeAt(position)
+                }
+                is Resource.Error -> {
+                    Log.w(TAG, it.message.toString())
+                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                }
+                is Resource.Loading -> {
+                    Toast.makeText(requireContext(), "Loading..", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -82,10 +107,16 @@ class VoiceListFragment : Fragment() {
     }
 
     private fun setRecyclerView() {
-        Log.d(TAG,"VoiceListFragment - setRecyclerView() called")
-        val adapter = VoiceRecyclerViewAdapter(voiceViewModel.voices) { title, uri ->
-            refreshLinkOfVoice(title, Uri.parse(uri))
-        }
+        val adapter = VoiceRecyclerViewAdapter(
+            voiceViewModel.voices,
+            { title, uri ->
+                refreshLinkOfVoice(title, Uri.parse(uri))
+            },
+            { position, fileName ->
+                Log.d(TAG,"VoiceListFragment - position : $position fileName : $fileName called")
+                voiceViewModel.deleteVoice(position, fileName)
+            }
+        )
 
         binding.list.adapter = adapter
         binding.list.layoutManager = LinearLayoutManager(requireContext())

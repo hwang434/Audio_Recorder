@@ -10,6 +10,7 @@ import com.example.audiorecorder.domain.IStorageDao
 import com.example.audiorecorder.domain.StorageDao
 import com.example.audiorecorder.dto.Voice
 import com.example.audiorecorder.utils.Resource
+import com.google.firebase.storage.StorageException
 import kotlinx.coroutines.*
 
 class VoiceViewModel : ViewModel() {
@@ -19,8 +20,8 @@ class VoiceViewModel : ViewModel() {
         private const val TAG: String = "로그"
     }
 
-    private val _voices = MutableLiveData<List<Voice>>()
-    val voices: LiveData<List<Voice>>
+    private val _voices = MutableLiveData<MutableList<Voice>>()
+    val voices: LiveData<MutableList<Voice>>
         get() = this._voices
     private val storageReference: IStorageDao by lazy { StorageDao() }
     // 타이머 시작 시각
@@ -36,6 +37,31 @@ class VoiceViewModel : ViewModel() {
     val linkOfVoice: LiveData<Resource<Voice>>
         get() = _linkOfVoice
 
+    // first는 리사이클러뷰에서의 위치, second는 삭제할 파일의 주소
+    private val _linkOfVoiceToDelete = MutableLiveData<Resource<Int>>()
+    val linkOfVoiceToDelete: LiveData<Resource<Int>>
+        get() = _linkOfVoiceToDelete
+
+    // coroutine Exception Handler
+    private val handler = CoroutineExceptionHandler { _, throwable ->
+        when (throwable) {
+            is StorageException -> {
+                when (throwable.errorCode) {
+                    StorageException.ERROR_OBJECT_NOT_FOUND -> {
+                        _linkOfVoice.postValue(Resource.Error(null, "File is Already deleted."))
+                    }
+                    else -> {
+                        _linkOfVoice.postValue(Resource.Error(null, "Storage has a problem."))
+                    }
+                }
+            }
+            else -> {
+                Log.w(TAG, ": error", throwable)
+                _linkOfVoice.postValue(Resource.Error(null, "System has a problem."))
+            }
+        }
+    }
+
     init {
         _isRecording.value = false
     }
@@ -50,7 +76,7 @@ class VoiceViewModel : ViewModel() {
     // 모든 음성 목록을 가져옴
     fun getAllVoices() {
         Log.d(TAG,"VoiceViewModel - getAllVoices() called")
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + handler) {
             val listOfVoice = storageReference.getAllVoices()
             _voices.postValue(listOfVoice)
         }
@@ -60,7 +86,7 @@ class VoiceViewModel : ViewModel() {
     fun refreshLinkOfVoice(title: String, uri: Uri) {
         Log.d(TAG,"VoiceViewModel - refreshLinkOfVoice() called")
         _linkOfVoice.postValue(Resource.Loading())
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + handler) {
             val downloadLink = storageReference.getDownloadLinkOfVoice(uri)
             withContext(Dispatchers.Main) {
                 _linkOfVoice.postValue(Resource.Success(Voice(fileName = title, uri = downloadLink.toString())))
@@ -84,7 +110,7 @@ class VoiceViewModel : ViewModel() {
     private fun updateStartTime(time: Long) {
         Log.d(TAG,"VoiceViewModel - updateStartTime() called")
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + handler) {
             // 녹음 중인 동안에만 UI를 업데이트함.
             while (_isRecording.value == true) {
                 yield()
@@ -98,5 +124,22 @@ class VoiceViewModel : ViewModel() {
         Log.d(TAG,"VoiceViewModel - stopTimer() called")
         _isRecording.value = false
         _statTime.value = Resource.Success(0)
+    }
+
+    fun deleteVoice(idx: Int, fileName: String) {
+        Log.d(TAG,"VoiceViewModel - deleteVoice(idx = $idx, uri = $fileName) called")
+        _linkOfVoiceToDelete.postValue(Resource.Loading())
+        viewModelScope.launch(Dispatchers.IO + handler) {
+            val isSuccess = storageReference.deleteVoice(fileName)
+
+            withContext(Dispatchers.Main) {
+                if (!isSuccess) {
+                    _linkOfVoiceToDelete.postValue(Resource.Error(null, "Fail to Delete"))
+                    return@withContext
+                }
+
+                _linkOfVoiceToDelete.postValue(Resource.Success(idx))
+            }
+        }
     }
 }
