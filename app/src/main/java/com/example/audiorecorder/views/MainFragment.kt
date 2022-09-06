@@ -261,11 +261,12 @@ class MainFragment : Fragment() {
         Log.d(TAG,"MainFragment - stopRecord() called")
         // 뷰모델의 시각을 0으로 바꾸고 isRecording을 false로 바꿈.
         stopViewModelTimer()
-        createFileNameAlert()?.apply { show() }
+        createAlertForFileNameEdit().show()
     }
 
     // 녹음 파일 제목을 정해주는 alertDialog 리턴
-    private fun createFileNameAlert(): AlertDialog? {
+    private fun createAlertForFileNameEdit(): AlertDialog {
+        Log.d(TAG,"MainFragment - createAlertForFileNameEdit() called")
         requireActivity().stopService(recordService)
         val editViewForFileName = EditText(requireContext())
         editViewForFileName.maxLines = 1
@@ -275,13 +276,31 @@ class MainFragment : Fragment() {
         aBuilder.apply {
             setTitle("파일명을 입력해주세요.")
             setView(editViewForFileName)
-            setPositiveButton("결정") { _, _ ->
-                setFileName("${editViewForFileName.text}.mp3")
+            setPositiveButton("결정") { _, _ -> }
+            setNegativeButton("cancel") { _, _ -> }
+        }
+
+        val alertDialog = aBuilder.create()
+        alertDialog.apply {
+            setCanceledOnTouchOutside(false)
+            setOnShowListener {
+                val positiveBtn = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                positiveBtn.setOnClickListener {
+                    val fileName = editViewForFileName.text.toString()
+                    // if : file name is match to regex. set file name and dismiss alert dialog.
+                    // else : Toast the message.
+                    if (FileNameRegex.isValidFileName(fileName)) {
+                        setFileName(fileName)
+                        dismiss()
+                        return@setOnClickListener
+                    }
+
+                    Toast.makeText(requireContext(), ToastMessage.fileRegexIsNotMatched, Toast.LENGTH_SHORT).show()
+                }
             }
         }
-        aBuilder.setTitle("파일명을 뭐라고 지으시겠습니다./")
 
-        return aBuilder.create()
+        return alertDialog
     }
 
     // 사용자가 웝하는 이름으로 파일명을 변경
