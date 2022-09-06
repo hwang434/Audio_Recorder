@@ -11,8 +11,9 @@ import com.example.audiorecorder.databinding.FragmentVoiceItemBinding
 import com.example.audiorecorder.dto.Voice
 
 class VoiceRecyclerViewAdapter(
-    private val livedataOfVoices: LiveData<List<Voice>>,
-    private val callBack: (title: String, uri: String?) -> Unit
+    private val livedataOfVoices: LiveData<MutableList<Voice>>,
+    private val callBack: (title: String, uri: String?) -> Unit,
+    private val deleteCallBack: (position: Int, fileName: String) -> Unit
 ) : RecyclerView.Adapter<VoiceRecyclerViewAdapter.ViewHolder>() {
     companion object {
         private const val TAG: String = "로그"
@@ -36,7 +37,11 @@ class VoiceRecyclerViewAdapter(
             buttonPlay.setOnClickListener {
                 callBack(textviewNameOfVoice.text.toString(), livedataOfVoices.value?.get(position)?.uri)
             }
+            buttonDelete.setOnClickListener {
+                deleteCallBack(position, textviewNameOfVoice.text.toString())
+            }
         }
+
     }
 
     override fun getItemCount(): Int {

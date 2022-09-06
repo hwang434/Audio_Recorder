@@ -19,8 +19,8 @@ class VoiceViewModel : ViewModel() {
         private const val TAG: String = "로그"
     }
 
-    private val _voices = MutableLiveData<List<Voice>>()
-    val voices: LiveData<List<Voice>>
+    private val _voices = MutableLiveData<MutableList<Voice>>()
+    val voices: LiveData<MutableList<Voice>>
         get() = this._voices
     private val storageReference: IStorageDao by lazy { StorageDao() }
     // 타이머 시작 시각
