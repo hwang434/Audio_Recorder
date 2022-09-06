@@ -28,6 +28,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.audiorecorder.R
 import com.example.audiorecorder.service.RecordService
 import com.example.audiorecorder.databinding.FragmentMainBinding
+import com.example.audiorecorder.utils.FileNameRegex
 import com.example.audiorecorder.utils.Resource
 import com.example.audiorecorder.utils.TimerDateFormat
 import com.example.audiorecorder.utils.ToastMessage
@@ -74,8 +75,6 @@ class MainFragment : Fragment() {
         setRecordService()
         setObserver()
     }
-
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -182,7 +181,6 @@ class MainFragment : Fragment() {
 
     private fun setEvent() {
         Log.d(TAG,"MainFragment - setEvent() called")
-
         // 녹음 시작
         binding.buttonRecordVoiceButton.setOnClickListener {
             if (!checkPermission()) {
@@ -238,7 +236,7 @@ class MainFragment : Fragment() {
     }
 
     private fun startViewModelTimer(time: Long) {
-        Log.d(TAG,"MainFragment - updateStartTime() called")
+        Log.d(TAG,"MainFragment - startViewModelTimer() called")
         voiceViewModel.startTimer(time)
     }
     
@@ -249,6 +247,7 @@ class MainFragment : Fragment() {
 
     // 녹음 서비스 실행
     private fun startRecordService() {
+        Log.d(TAG,"MainFragment - startRecordService() called")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             requireActivity().startForegroundService(recordService)
         } else {
@@ -259,7 +258,7 @@ class MainFragment : Fragment() {
     // 정지 = 아예 정지하고 파일을 저장함.
     private fun stopRecord() {
         Log.d(TAG,"MainFragment - stopRecord() called")
-        // 뷰모델의 시각을 0으로 바꾸고 isRecording을 false로 바꿈.
+        // 뷰모델의 시각을 0으로 바꾸고 "isRecording"을 "false"로 바꿈.
         stopViewModelTimer()
         createAlertForFileNameEdit().show()
     }
@@ -305,8 +304,7 @@ class MainFragment : Fragment() {
 
     // 사용자가 웝하는 이름으로 파일명을 변경
     private fun setFileName(fileName: String) {
-        Log.d(TAG,"MainFragment - setFileName() called")
-        Log.d(TAG,"MainFragment - originalName : $originalName fileName : $fileName called")
+        Log.d(TAG,"MainFragment - setFileName(fileName = $fileName) called")
         val dir = File(directoryOfVoice)
         if (!dir.exists()) {
             Log.d(TAG,"MainFragment - dir not exist() called")
