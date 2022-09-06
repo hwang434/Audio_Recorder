@@ -276,9 +276,8 @@ class MainFragment : Fragment() {
         aBuilder.apply {
             setTitle("파일명을 입력해주세요.")
             setView(editViewForFileName)
-            setPositiveButton("결정") { _, _ ->
-                setFileName("${editViewForFileName.text}.mp3")
-            }
+            setPositiveButton("결정") { _, _ -> }
+            setNegativeButton("cancel") { _, _ -> }
         }
 
         val alertDialog = aBuilder.create()
