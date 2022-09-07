@@ -63,10 +63,10 @@ class VoiceListFragment : Fragment() {
             Log.d(TAG,"VoiceListFragment - linkOfVoice Changed() called")
             when (resource) {
                 is Resource.Success -> {
-                    resource.data?.fileName?.let {
+                    resource.data?.let { voice ->
                         startMediaPlayerService(
-                            title = it,
-                            uri = Uri.parse(resource.data.uri)
+                            title = voice.fileName,
+                            uri = Uri.parse(voice.uri)
                         )
                     }
                 }
