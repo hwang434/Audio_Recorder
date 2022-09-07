@@ -24,7 +24,7 @@
         <service
             android:name=".service.PlayerService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false" />
         <service
             android:name=".service.RecordService"
             android:enabled="true"
@@ -41,6 +41,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver
+            android:name=".utils.PlayerBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="action1" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
